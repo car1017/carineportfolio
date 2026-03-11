@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carine Thertulien</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
+body { font-family: -apple-system, Helvetica, Arial, sans-serif; font-weight: 300; cursor: none; }
+
+:root {
+  --cream: #f2ede6;
+  --teal: #DEA450;
+  --ink: #111;
+  --mid: #666;
+  --faint: #bbb;
+}
+
+/* CURSOR */
+#cur { position: fixed; width: 10px; height: 10px; border-radius: 50%; background: var(--teal); pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .2s, height .2s; }
+#cur.big { width: 30px; height: 30px; background: rgba(222,164,80,.25); }
+
+/* DECK */
+#deck { position: fixed; inset: 0; }
+
+/* SLIDES */
+.slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .6s; display: grid; background: var(--cream); overflow: hidden; }
+.slide.active { opacity: 1; pointer-events: auto; }
+
+/* TOP RULE */
+.rule { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--teal); z-index: 10; transform: scaleX(0); transform-origin: left; transition: transform .5s .1s; }
+.slide.active .rule { transform: scaleX(1); }
+
+/* SLIDE NUMBER */
+.snum { position: absolute; top: 1.6rem; right: 2rem; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); z-index: 10; }
+
+/* MARK */
+.mark { position: absolute; bottom: 1.8rem; right: 2rem; font-size: 2.4rem; font-weight: 900; color: var(--ink); z-index: 10; letter-spacing: -.02em; }
+.mark.inv { color: var(--cream); }
+.mark.teal { color: var(--teal); }
+
+/* ENTRY ANIMATIONS */
+.e1, .e2, .e3, .e4 { opacity: 0; transform: translateY(16px); }
+.slide.active .e1 { animation: up .5s .1s forwards; }
+.slide.active .e2 { animation: up .5s .25s forwards; }
+.slide.active .e3 { animation: up .5s .4s forwards; }
+.slide.active .e4 { animation: up .5s .55s forwards; }
+@keyframes up { to { opacity: 1; transform: none; } }
+
+/* SHARED */
+.lbl { font-size: .58rem; letter-spacing: .24em; text-transform: uppercase; color: var(--mid); display: block; margin-bottom: 1.2rem; }
+.lbl-w { font-size: .58rem; letter-spacing: .24em; text-transform: uppercase; color: rgba(255,255,255,.45); display: block; margin-bottom: 1.2rem; }
+.hdg { font-size: clamp(2.2rem, 4vw, 4rem); font-weight: 900; color: var(--ink); line-height: .92; text-transform: uppercase; letter-spacing: -.01em; }
+.hdg .t { color: var(--teal); display: block; }
+.hdg-w { font-size: clamp(2.2rem, 4vw, 4rem); font-weight: 900; color: #fff; line-height: .92; text-transform: uppercase; letter-spacing: -.01em; }
+.hdg-w .t { color: var(--teal); display: block; }
+.body-t { font-size: .85rem; color: var(--mid); line-height: 1.85; }
+.body-t p { margin-bottom: .9rem; }
+.body-t strong { color: var(--ink); font-weight: 500; }
+
+/* NAV DOTS */
+#dots { position: fixed; right: 1.2rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 200; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,.2); border: none; cursor: pointer; transition: background .3s, transform .3s; }
+.dot.on { background: var(--teal); transform: scale(1.8); }
+
+/* ARROWS */
+.arr { position: fixed; bottom: 1.8rem; z-index: 200; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,.2); background: none; font-size: .9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink); transition: background .2s, color .2s; }
+.arr:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+#ap { left: calc(50% - 48px); }
+#an { left: calc(50% + 10px); }
+
+/* ─── S1: COVER ─── */
+#s1 { grid-template-columns: 1fr 1fr; }
+.s1l { background: var(--cream); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid rgba(0,0,0,.1); }
+.s1r { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s1-name { font-size: clamp(4rem, 9vw, 9rem); font-weight: 900; line-height: .88; letter-spacing: -.02em; color: var(--ink); text-transform: uppercase; }
+.s1-name span { color: var(--teal); display: block; }
+.s1-contact { font-size: .75rem; color: var(--mid); line-height: 2; }
+.s1-tagline { font-size: clamp(1.3rem, 2.2vw, 2rem); font-weight: 900; text-transform: uppercase; color: var(--ink); line-height: 1.15; letter-spacing: .02em; max-width: 320px; }
+.s1-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 2rem; margin-top: auto; }
+.s1-il { font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); margin-bottom: .15rem; }
+.s1-iv { font-size: .82rem; color: var(--ink); }
+
+/* ─── S2: ABOUT ─── */
+#s2 { grid-template-columns: 1fr 1fr; }
+.s2l { background: var(--teal); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s2r { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s2-nums { display: flex; flex-direction: column; margin-top: 1rem; }
+.s2-row { display: flex; align-items: baseline; gap: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.15); padding: .7rem 0; }
+.s2-row:first-child { border-top: 1px solid rgba(255,255,255,.15); }
+.s2-n { font-size: clamp(3rem, 5.5vw, 5.5rem); font-weight: 900; color: #fff; line-height: 1; min-width: 110px; }
+.s2-lbl { font-size: .65rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+.pills { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: auto; }
+.pill { padding: .28rem .8rem; background: var(--ink); color: var(--cream); font-size: .63rem; letter-spacing: .07em; text-transform: uppercase; }
+.pill.o { background: none; border: 1px solid rgba(0,0,0,.22); color: var(--mid); }
+
+/* ─── S3: DANCE ─── */
+#s3 { grid-template-columns: 1fr 1fr; }
+.s3l { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s3r { background: var(--ink); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative; }
+.s3-ghost { font-size: clamp(6rem, 12vw, 13rem); font-weight: 900; color: rgba(255,255,255,.04); line-height: 1; letter-spacing: -.02em; pointer-events: none; position: absolute; bottom: 3rem; right: 1rem; }
+.s3-hdg { font-size: clamp(2.5rem, 5vw, 5.5rem); font-weight: 900; color: #fff; line-height: .9; text-transform: uppercase; }
+.s3-hdg span { color: var(--teal); display: block; }
+.achs { display: flex; flex-direction: column; gap: .7rem; margin-top: 1.5rem; }
+.ach { border-left: 3px solid var(--teal); padding: .65rem 1rem; background: rgba(255,255,255,.04); }
+.ach-t { font-size: .8rem; color: #fff; font-weight: 500; margin-bottom: .18rem; }
+.ach-d { font-size: .68rem; color: rgba(255,255,255,.4); }
+
+/* ─── S4: MUSIC ─── */
+#s4 { grid-template-columns: 1.2fr 1fr; }
+.s4l { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s4r { border-left: 1px solid rgba(0,0,0,.1); padding: 3rem 2.5rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+.s4-big { font-size: clamp(3.5rem, 7vw, 7.5rem); font-weight: 900; line-height: .88; letter-spacing: -.02em; color: var(--ink); text-transform: uppercase; }
+.s4-big span { color: var(--teal); display: block; }
+.music-rows { display: flex; flex-direction: column; margin-top: .5rem; }
+.mr { display: flex; justify-content: space-between; align-items: baseline; padding: .9rem 0; border-bottom: 1px solid rgba(0,0,0,.08); }
+.mr:first-child { border-top: 1px solid rgba(0,0,0,.08); }
+.mr-n { font-size: .85rem; color: var(--ink); }
+.mr-r { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.4rem; }
+.tag { padding: .28rem .8rem; border: 1.5px solid var(--teal); font-size: .63rem; letter-spacing: .07em; text-transform: uppercase; color: var(--teal); }
+
+/* ─── S5: ACTIVITIES ─── */
+#s5 { grid-template-columns: 1fr 1fr 1fr; }
+.s5c { padding: 3rem 2.5rem 5rem; display: flex; flex-direction: column; border-right: 1px solid rgba(0,0,0,.09); }
+.s5c:last-child { border-right: none; }
+.s5c:nth-child(2) { background: rgba(0,0,0,.02); }
+.s5-cat { font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--teal); margin-bottom: .5rem; }
+.s5-title { font-size: clamp(1.8rem, 2.8vw, 2.8rem); font-weight: 900; color: var(--ink); line-height: 1; text-transform: uppercase; margin-bottom: 1.5rem; }
+.s5-list { list-style: none; display: flex; flex-direction: column; gap: .55rem; margin-top: auto; }
+.s5-list li { font-size: .78rem; color: var(--mid); padding-left: 1rem; position: relative; line-height: 1.5; }
+.s5-list li::before { content: '—'; position: absolute; left: 0; color: var(--teal); }
+
+/* ─── S_WORK: WORK EXPERIENCE ─── */
+#swork { grid-template-columns: 1fr 1.5fr; }
+.swl { background: var(--cream); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid rgba(0,0,0,.1); }
+.swr { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+.sw-hdg { font-size: clamp(3rem, 6.5vw, 7rem); font-weight: 900; color: var(--ink); line-height: .9; text-transform: uppercase; }
+.sw-hdg span { color: var(--teal); display: block; }
+.work-rows { display: flex; flex-direction: column; }
+.work-row { padding: 1.8rem 0; border-bottom: 1px solid rgba(0,0,0,.09); }
+.work-row:first-child { border-top: 1px solid rgba(0,0,0,.09); }
+.work-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }
+.work-title { font-size: clamp(1.1rem, 1.8vw, 1.6rem); font-weight: 900; color: var(--ink); text-transform: uppercase; letter-spacing: .01em; }
+.work-date { font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; color: var(--teal); }
+.work-place { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); margin-bottom: .5rem; font-weight: 500; }
+.work-desc { font-size: .8rem; color: var(--mid); line-height: 1.7; }
+
+
+#s6 { grid-template-columns: 1fr 1.5fr; }
+.s6l { background: var(--ink); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s6r { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+.s6-hdg { font-size: clamp(3rem, 6.5vw, 7rem); font-weight: 900; color: #fff; line-height: .9; text-transform: uppercase; }
+.s6-hdg span { color: var(--teal); display: block; }
+.s6-sub { font-size: .78rem; color: rgba(255,255,255,.38); line-height: 1.8; margin-top: 1.5rem; max-width: 260px; }
+.edu-rows { display: flex; flex-direction: column; }
+.edu-row { display: grid; grid-template-columns: 90px 1fr; gap: 0 2rem; padding: 1.3rem 0; border-bottom: 1px solid rgba(0,0,0,.09); }
+.edu-row:first-child { border-top: 1px solid rgba(0,0,0,.09); }
+.edu-d { font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); padding-top: .15rem; }
+.edu-h { font-size: clamp(1rem, 1.7vw, 1.6rem); font-weight: 900; color: var(--ink); text-transform: uppercase; line-height: 1; margin-bottom: .28rem; letter-spacing: .01em; }
+.edu-role { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); margin-bottom: .3rem; }
+.edu-desc { font-size: .76rem; color: var(--mid); line-height: 1.65; }
+
+/* ─── S7: SKILLS ─── */
+#s7 { grid-template-columns: 1fr 1fr; }
+.s7l { background: var(--teal); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s7r { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s7-hdg { font-size: clamp(2.5rem, 5.5vw, 6rem); font-weight: 900; color: #fff; line-height: .9; text-transform: uppercase; }
+.lang-block { display: flex; flex-direction: column; gap: .6rem; margin-top: auto; }
+.lang-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.15); padding-bottom: .75rem; }
+.lang-n { font-size: 1.8rem; font-weight: 900; color: #fff; text-transform: uppercase; }
+.lang-l { font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: .5rem; }
+.stag { padding: .38rem 1rem; border: 1.5px solid rgba(0,0,0,.15); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--mid); cursor: default; transition: all .18s; }
+.stag:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+.s7-note { font-size: .76rem; color: var(--faint); line-height: 1.7; margin-top: auto; max-width: 300px; }
+
+/* ─── S8: CONTACT ─── */
+#s8 { grid-template-columns: 1fr 1fr; }
+.s8l { padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: space-between; }
+.s8r { border-left: 1px solid rgba(0,0,0,.1); padding: 3rem 3rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+.s8-big { font-size: clamp(3.5rem, 7.5vw, 8.5rem); font-weight: 900; line-height: .88; letter-spacing: -.02em; color: var(--ink); text-transform: uppercase; }
+.s8-big span { color: var(--teal); display: block; }
+.s8-note { font-size: .85rem; color: var(--mid); line-height: 1.8; max-width: 340px; }
+.ci-rows { display: flex; flex-direction: column; }
+.ci { display: flex; justify-content: space-between; align-items: baseline; padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,.09); text-decoration: none; transition: padding-left .15s; }
+.ci:first-child { border-top: 1px solid rgba(0,0,0,.09); }
+.ci:hover { padding-left: .5rem; }
+.ci-l { font-size: .58rem; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.ci-v { font-size: .85rem; color: var(--ink); transition: color .15s; }
+.ci:hover .ci-v { color: var(--teal); }
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  #s1,#s2,#s3,#s4,#s6,#s7,#s8,#swork { grid-template-columns: 1fr; }
+  #s5 { grid-template-columns: 1fr; }
+  .s5c { border-right: none; border-bottom: 1px solid rgba(0,0,0,.09); }
+  .slide { overflow-y: auto; }
+  #dots { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+
+<nav id="dots"></nav>
+<button class="arr" id="ap">&#8592;</button>
+<button class="arr" id="an">&#8594;</button>
+
+<div id="deck">
+
+  <!-- S1: COVER -->
+  <div class="slide active" id="s1" data-i="0">
+    <div class="rule"></div>
+    <div class="s1l">
+      <div class="s1-contact e1">
+        <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="12717360667a77602322222552757f737b7e3c717d7f">[email&#160;protected]</a><br>
+        <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e1828795d3d4a1928280938d84958c80888dcf93949586849392cf848594">[email&#160;protected]</a><br>
+        +1 (425) 520-4523
+      </div>
+      <div class="s1-name e2">CARINE<span>THERTULIEN</span></div>
+    </div>
+    <div class="s1r">
+      <p class="s1-tagline e1">Business Student</p>
+      <div class="s1-grid e3">
+        <div><div class="s1-il">University</div><div class="s1-iv">Rutgers Newark</div></div>
+        <div><div class="s1-il">Major</div><div class="s1-iv">Business</div></div>
+        <div><div class="s1-il">Class Of</div><div class="s1-iv">2029</div></div>
+        <div><div class="s1-il">Languages</div><div class="s1-iv">EN &amp; ES</div></div>
+        <div><div class="s1-il">Based</div><div class="s1-iv">New Jersey</div></div>
+      </div>
+    </div>
+    <span class="snum">01 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- S2: ABOUT -->
+  <div class="slide" id="s2" data-i="1">
+    <div class="rule"></div>
+    <div class="s2l">
+      <span class="lbl-w e1">02 — About</span>
+      <div class="s2-nums e2">
+        <div class="s2-row"><span class="s2-n">10+</span><span class="s2-lbl">Years Dancing</span></div>
+        <div class="s2-row"><span class="s2-n">10+</span><span class="s2-lbl">Years Piano</span></div>
+        <div class="s2-row"><span class="s2-n">10+</span><span class="s2-lbl">Years Golf</span></div>
+        <div class="s2-row"><span class="s2-n">02</span><span class="s2-lbl">First Languages</span></div>
+        <div class="s2-row"><span class="s2-n">15</span><span class="s2-lbl">Years at Colegio Bilingüe</span></div>
+      </div>
+    </div>
+    <div class="s2r">
+      <h2 class="hdg e1">A LIFE LIVED<br><span class="t">AT FULL TILT</span></h2>
+      <div class="body-t e2" style="margin-top:1.2rem">
+        <p>I'm Carine Thertulien — a bilingual first-year Business student at <strong>Rutgers University Newark</strong> shaped by a life of performance, creativity, and discipline.</p>
+        <p>Born in the Dominican Republic, I built my foundation across 15 years at <strong>Colegio Bilingüe New Horizons</strong> before earning my diploma at James Madison High School.</p>
+      </div>
+      <div class="pills e3">
+        <span class="pill">RU-N Dance Club</span>
+        <span class="pill o">Creativity Award</span>
+        <span class="pill o">Honor Roll</span>
+        <span class="pill o">Music Honor Society</span>
+      </div>
+    </div>
+    <span class="snum">02 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- S7: SKILLS -->
+  <div class="slide" id="s7" data-i="2">
+    <div class="rule"></div>
+    <div class="s7l">
+      <span class="lbl-w e1">07 — Skills</span>
+      <h2 class="s7-hdg e2">BUILT<br>FOR<br>ANY<br>ROOM</h2>
+      <div class="lang-block e3">
+        <div class="lang-row"><span class="lang-n">English</span><span class="lang-l">First Language</span></div>
+        <div class="lang-row"><span class="lang-n">Español</span><span class="lang-l">First Language</span></div>
+      </div>
+    </div>
+    <div class="s7r">
+      <span class="lbl e1">Core Strengths</span>
+      <div class="tag-cloud e2">
+        <span class="stag">Creativity</span>
+        <span class="stag">Leadership</span>
+        <span class="stag">Time Management</span>
+        <span class="stag">Teamwork</span>
+        <span class="stag">Critical Thinking</span>
+        <span class="stag">Adaptability</span>
+        <span class="stag">Communication</span>
+        <span class="stag">Emotional Intelligence</span>
+        <span class="stag">Discipline</span>
+        <span class="stag">Empathy</span>
+        <span class="stag">Resilience</span>
+        <span class="stag">Strategic Thinking</span>
+        <span class="stag">Collaboration</span>
+        <span class="stag">Performance</span>
+        <span class="stag">Design</span>
+        <span class="stag">Resourcefulness</span>
+      </div>
+      <p class="s7-note e3">A unique blend of creative, athletic, and interpersonal strengths — forged across two decades of performance and leadership.</p>
+    </div>
+    <span class="snum">03 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- SWORK: WORK EXPERIENCE -->
+  <div class="slide" id="swork" data-i="3">
+    <div class="rule"></div>
+    <div class="swl">
+      <span class="lbl e1">06 — Work Experience</span>
+      <div class="sw-hdg e2">WORK<span>EXPERIENCE</span></div>
+    </div>
+    <div class="swr">
+      <div class="work-rows">
+        <div class="work-row e2">
+          <div class="work-top">
+            <span class="work-title">Camp Counselor</span>
+            <span class="work-date">Summer 2026</span>
+          </div>
+          <div class="work-place">Camp Merri-Mac · Asheville, North Carolina</div>
+          <div class="work-desc">Upcoming position at a sleep-away camp in Asheville, NC. Will be teaching guitar and volleyball to campers.</div>
+        </div>
+      </div>
+    </div>
+    <span class="snum">04 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- S3: DANCE -->
+  <div class="slide" id="s3" data-i="4">
+    <div class="rule"></div>
+    <div class="s3l">
+      <span class="lbl e1">03 — Dance</span>
+      <div class="e2">
+        <div class="hdg" style="margin-bottom:1rem">THE STAGE<br><span class="t">IS HOME.</span></div>
+        <div class="body-t">Hip-hop, jazz, and classical ballet. Training, performing, and leading — dance has been at the center of my life for over a decade. Now part of <strong>RU-N Dance</strong> club at Rutgers University Newark.</div>
+      </div>
+      <div></div>
+    </div>
+    <div class="s3r">
+      <div class="s3-ghost e1">10+</div>
+      <h2 class="s3-hdg e2">JOFFREY<span>BALLET</span>TRAINED</h2>
+      <div class="achs e3">
+        <div class="ach"><div class="ach-t">NYC Ballet Intensive '24</div><div class="ach-d">Joffrey Ballet School — New York City</div></div>
+        <div class="ach"><div class="ach-t">Joffrey Trainee Program</div><div class="ach-d">Personally invited after multiple program acceptances</div></div>
+        <div class="ach"><div class="ach-t">RU-N Dance Club</div><div class="ach-d">Rutgers University Newark · 2025–Present</div></div>
+        <div class="ach"><div class="ach-t">Hip-Hop &amp; Jazz</div><div class="ach-d">Multi-style performer · 10+ years</div></div>
+      </div>
+    </div>
+    <span class="snum">05 / 09</span>
+    <span class="mark inv">CT.</span>
+  </div>
+
+  <!-- S4: MUSIC -->
+  <div class="slide" id="s4" data-i="5">
+    <div class="rule"></div>
+    <div class="s4l">
+      <span class="lbl e1">04 — Music</span>
+      <div class="s4-big e2">STRINGS<span>&amp; KEYS</span></div>
+      <div class="e3">
+        <div class="body-t" style="max-width:380px;margin-bottom:1.2rem">From 10+ years of classical piano to performing as Guitar Soloist and touring with the Guitar Travel Team. Performed live with band <strong>Boyd Meets Girl</strong>.</div>
+        <div class="tags">
+          <span class="tag">Piano · 10+ yrs</span>
+          <span class="tag">Guitar Soloist</span>
+          <span class="tag">Tri-M Honor Society</span>
+          <span class="tag">Travel Team</span>
+        </div>
+      </div>
+    </div>
+    <div class="s4r e2">
+      <div class="music-rows">
+        <div class="mr"><span class="mr-n">Guitar Soloist</span><span class="mr-r">Spring Concert '24</span></div>
+        <div class="mr"><span class="mr-n">Tri-M Music</span><span class="mr-r">Member &amp; Liaison</span></div>
+        <div class="mr"><span class="mr-n">Boyd Meets Girl</span><span class="mr-r">Live Band</span></div>
+        <div class="mr"><span class="mr-n">Guitar Travel Team</span><span class="mr-r">Member</span></div>
+        <div class="mr"><span class="mr-n">Classical Piano</span><span class="mr-r">10+ Years</span></div>
+      </div>
+    </div>
+    <span class="snum">06 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- S5: ACTIVITIES -->
+  <div class="slide" id="s5" data-i="6">
+    <div class="rule"></div>
+    <div class="s5c">
+      <span class="s5-cat e1">Sports</span>
+      <h3 class="s5-title e2">Volleyball<br>&amp; Golf</h3>
+      <ul class="s5-list e3">
+        <li>Libero &amp; outside hitter, girls team</li>
+        <li>Setter, boys volleyball (2022–23)</li>
+        <li>PGA Junior Golf Camp</li>
+        <li>Golfer for 10+ years</li>
+        <li>Camp Counselor, Camp Merri-Mac (Summer 2026)</li>
+      </ul>
+    </div>
+    <div class="s5c">
+      <span class="s5-cat e1">Art &amp; Direction</span>
+      <h3 class="s5-title e2">Creative<br>Work</h3>
+      <ul class="s5-list e3">
+        <li>Creative Director, Student Gov't 2024–present</li>
+        <li>Illustrated pages for upcoming published book</li>
+        <li>Recreated 2016 Miss DR Costume for Miss Universe pageant</li>
+        <li>Props designer for school play</li>
+      </ul>
+    </div>
+    <div class="s5c">
+      <span class="s5-cat e1">Research &amp; More</span>
+      <h3 class="s5-title e2">Beyond<br>the Stage</h3>
+      <ul class="s5-list e3">
+        <li>Led solid-waste repurposing research (2022–23)</li>
+        <li>Greywater recycling research (2021–22)</li>
+        <li>Camp Counselor, Camp Merri-Mac, Asheville, NC (Summer 2026)</li>
+        <li>Rescued &amp; raised 2 kittens (2020–23)</li>
+      </ul>
+    </div>
+    <span class="snum">07 / 09</span>
+    <span class="mark">CT.</span>
+  </div>
+
+  <!-- S6: EDUCATION -->
+  <div class="slide" id="s6" data-i="7">
+    <div class="rule"></div>
+    <div class="s6l">
+      <span class="lbl-w e1">06 — Education</span>
+      <div class="e2">
+        <div class="s6-hdg">EDU<span>CATION</span></div>
+        <p class="s6-sub">From a bilingual school in the Dominican Republic to a US university — built on curiosity, discipline, and a drive to excel.</p>
+      </div>
+      <span style="font-size:1.1rem;font-weight:900;color:rgba(255,255,255,.7);letter-spacing:.06em">CARINE T.</span>
+    </div>
+    <div class="s6r">
+      <div class="edu-rows">
+        <div class="edu-row e2">
+          <div class="edu-d">2025–<br>2029</div>
+          <div>
+            <div class="edu-h">Rutgers Newark</div>
+            <div class="edu-role">B.S. Business · Class of 2029</div>
+            <div class="edu-desc">Freshman. Part of RU-N Dance club. Building toward a career at the intersection of creativity and business.</div>
+          </div>
+        </div>
+        <div class="edu-row e3">
+          <div class="edu-d">2023–<br>2025</div>
+          <div>
+            <div class="edu-h">James Madison HS</div>
+            <div class="edu-role">High School Diploma · Music Honor Society Medal</div>
+            <div class="edu-desc">Creative Director of Student Government. Guitar Soloist. Environmental Research Leader.</div>
+          </div>
+        </div>
+        <div class="edu-row e4">
+          <div class="edu-d">2009–<br>2023</div>
+          <div>
+            <div class="edu-h">Colegio Bilingüe New Horizons</div>
+            <div class="edu-role">Honor Roll · Creativity Award</div>
+            <div class="edu-desc">15 years of bilingual education in English &amp; Spanish. Foundation of arts, athletics, languages, and academic excellence.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="snum">08 / 09</span>
+    <span class="mark inv">CT.</span>
+  </div>
+
+  <!-- S8: CONTACT -->
+  <div class="slide" id="s8" data-i="8">
+    <div class="rule"></div>
+    <div class="s8l">
+      <span class="lbl e1">08 — Contact</span>
+      <div class="s8-big e2">LET'S<span>CONNECT</span></div>
+      <p class="s8-note e3">Whether it's a creative collaboration, dance opportunity, business conversation, or just hello — reach out.</p>
+    </div>
+    <div class="s8r">
+      <div class="ci-rows e2">
+        <a href="tel:4255204523" class="ci"><span class="ci-l">Phone</span><span class="ci-v">+1 (425) 520-4523</span></a>
+        <a href="/cdn-cgi/l/email-protection#eb888a999f838e99dadbdbdcab8c868a8287c5888486" class="ci"><span class="ci-l">Personal Email</span><span class="ci-v"><span class="__cf_email__" data-cfemail="64070516100c011655545453240309050d084a070b09">[email&#160;protected]</span></span></a>
+        <a href="/cdn-cgi/l/email-protection#ceada8bafcfb8ebdadafbca2abbaa3afa7a2e0bcbbbaa9abbcbde0abaabb" class="ci"><span class="ci-l">School Email</span><span class="ci-v"><span class="__cf_email__" data-cfemail="debdb8aaeceb9eadbdbfacb2bbaab3bfb7b2f0acabaab9bbacadf0bbbaab">[email&#160;protected]</span></span></a>
+        <a href="https://www.linkedin.com/in/carine-thertulien-b51a27369" target="_blank" class="ci"><span class="ci-l">LinkedIn</span><span class="ci-v">Carine Thertulien &#8594;</span></a>
+      </div>
+    </div>
+    <span class="snum">09 / 09</span>
+    <span class="mark teal">CT.</span>
+  </div>
+
+<script>
+var slides = document.querySelectorAll('.slide');
+var total = slides.length;
+var cur = 0;
+var busy = false;
+
+var dotsEl = document.getElementById('dots');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('button');
+  d.className = 'dot';
+  d.setAttribute('data-i', i);
+  dotsEl.appendChild(d);
+}
+var dots = document.querySelectorAll('.dot');
+dots[0].classList.add('on');
+
+function go(idx) {
+  if (busy || idx === cur || idx < 0 || idx >= total) return;
+  busy = true;
+  slides[cur].classList.remove('active');
+  dots[cur].classList.remove('on');
+  cur = idx;
+  slides[cur].classList.add('active');
+  dots[cur].classList.add('on');
+  setTimeout(function() { busy = false; }, 700);
+}
+
+dots.forEach(function(d) {
+  d.addEventListener('click', function() { go(parseInt(this.getAttribute('data-i'))); });
+});
+
+document.getElementById('an').addEventListener('click', function() { go(cur + 1); });
+document.getElementById('ap').addEventListener('click', function() { go(cur - 1); });
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(cur - 1);
+});
+
+var wt;
+document.addEventListener('wheel', function(e) {
+  clearTimeout(wt);
+  wt = setTimeout(function() { e.deltaY > 0 ? go(cur + 1) : go(cur - 1); }, 80);
+}, { passive: true });
+
+var tx = 0, ty = 0;
+document.addEventListener('touchstart', function(e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', function(e) {
+  var dx = e.changedTouches[0].clientX - tx;
+  var dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) { dy < 0 ? go(cur + 1) : go(cur - 1); }
+  else if (Math.abs(dx) > 40) { dx < 0 ? go(cur + 1) : go(cur - 1); }
+}, { passive: true });
+
+var c = document.getElementById('cur');
+document.addEventListener('mousemove', function(e) { c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px'; });
+document.querySelectorAll('a, button, .dot, .stag').forEach(function(el) {
+  el.addEventListener('mouseenter', function() { c.classList.add('big'); });
+  el.addEventListener('mouseleave', function() { c.classList.remove('big'); });
+});
+</script>
+</body>
+</html>
